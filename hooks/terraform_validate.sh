@@ -107,21 +107,11 @@ function per_dir_hook_unique_part {
   # First try `terraform validate` with the hope that all deps are
   # pre-installed. That is needed for cases when `.terraform/modules`
   # or `.terraform/providers` missed AND that is expected.
-  validate_output=$(terraform validate "${args[@]}" 2>&1) && {
+  terraform validate "${args[@]}" 2>&1 >/dev/null && {
     exit_code=$?
-
-    echo inside first validate
-    if [ $exit_code -ne 0 ]; then
-      common::colorify "red" "Validation failed: $dir_path"
-      echo -e "$validate_output\n\n"
-      echo print validate error
-    fi
-
-    # return exit code to common::per_dir_hook
     return $exit_code
   }
 
-echo go to init
   # In case `terraform validate` failed to execute
   # - check is simple `terraform init` will help
   common::terraform_init 'terraform validate' "$dir_path" || {
