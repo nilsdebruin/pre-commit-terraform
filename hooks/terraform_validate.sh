@@ -70,18 +70,13 @@ function match_validate_errors {
 # Arguments:
 #   dir_path (string) PATH to dir relative to git repo root.
 #     Can be used in error logging
-#   change_dir_in_unique_part (string/false) Modifier which creates
-#     possibilities to use non-common chdir strategies.
-#     Availability depends on hook.
 #   args (array) arguments that configure wrapped tool behavior
 # Outputs:
 #   If failed - print out hook checks status
 #######################################################################
 function per_dir_hook_unique_part {
   local -r dir_path="$1"
-  # shellcheck disable=SC2034 # Unused var.
-  local -r change_dir_in_unique_part="$2"
-  shift 2
+  shift
   local -a -r args=("$@")
 
   local exit_code
@@ -109,6 +104,23 @@ function per_dir_hook_unique_part {
     esac
   done
 
+  # First try `terraform validate` with the hope that all deps are
+  # pre-installed. That is needed for cases when `.terraform/modules`
+  # or `.terraform/providers` missed AND that is expected.
+  validate_output=$(terraform validate "${args[@]}" 2>&1) && {
+    exit_code=$?
+
+    if [ $exit_code -ne 0 ]; then
+      common::colorify "red" "Validation failed: $dir_path"
+      echo -e "$validate_output\n\n"
+    fi
+
+    # return exit code to common::per_dir_hook
+    return $exit_code
+  }
+
+  # In case `terraform validate` failed to execute
+  # - check is simple `terraform init` will help
   common::terraform_init 'terraform validate' "$dir_path" || {
     exit_code=$?
     return $exit_code
