@@ -150,5 +150,5 @@
   require_serial: true
   entry: hooks/terragrunt_providers_lock.sh
   language: script
-  files: (\.hcl)$
+  files: ^terragrunt\/.+\/terragrunt\.hcl$
   exclude: \.terraform\/.*$|\.terragrunt-cache\/.*$
