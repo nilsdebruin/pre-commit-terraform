@@ -143,3 +143,12 @@
     - --args=terraform
   files: \.tf$
   require_serial: true
+
+- id: terragrunt_providers_lock
+  name: Lock terragrunt provider versions
+  description: Updates provider signatures in dependency lock files.
+  require_serial: true
+  entry: hooks/terragrunt_providers_lock.sh
+  language: script
+  files: (\.terraform\.lock\.hcl)$
+  exclude: \.terraform\/.*$
