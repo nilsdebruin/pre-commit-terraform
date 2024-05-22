@@ -37,14 +37,17 @@ def main(argv=None):
 
     for dir in dirs:
         try:
-            procArgs = []
-            procArgs.append('terraform-docs')
+            procArgs = ['terraform-docs']
             if args.sort:
                 procArgs.append('--sort-by-required')
-            procArgs.append('md')
-            procArgs.append("./{dir}".format(dir=dir))
-            procArgs.append('>')
-            procArgs.append("./{dir}/{dest}".format(dir=dir, dest=args.dest))
+            procArgs.extend(
+                (
+                    'md',
+                    "./{dir}".format(dir=dir),
+                    '>',
+                    "./{dir}/{dest}".format(dir=dir, dest=args.dest),
+                )
+            )
             subprocess.check_call(" ".join(procArgs), shell=True)
         except subprocess.CalledProcessError as e:
             print(e)
